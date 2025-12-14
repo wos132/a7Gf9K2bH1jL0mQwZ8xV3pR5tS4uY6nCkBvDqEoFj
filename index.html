@@ -86,14 +86,20 @@ let cameras = [];
 let currentCameraIndex = 0;
 
 // ===== START =====
-if (!localStorage.getItem("garageCode")) {
-    startQR(); 
-} else if (!localStorage.getItem("userName")) {
-    codeScreen.classList.add("hidden");
-    startVideo();
-} else {
-    codeScreen.classList.add("hidden");
-    showMain();
+function init() {
+    const code = localStorage.getItem("garageCode");
+    const name = localStorage.getItem("userName");
+
+    if (!code) {
+        startQR();
+    } else if (!name) {
+        codeScreen.classList.add("hidden");
+        startVideo();
+    } else {
+        codeScreen.classList.add("hidden");
+        nameScreen.classList.add("hidden");
+        showMain();
+    }
 }
 
 // ===== ZAPIS KODU =====
@@ -101,15 +107,24 @@ function saveCode(val) {
     val = val || document.getElementById("codeInput").value.trim();
     if (!val) return;
     localStorage.setItem("garageCode", val);
-    stopQR();
-    codeScreen.classList.add("hidden");
-    startVideo();
+    stopQR();           // zatrzymanie skanera QR
+    location.reload();  // odświeżenie strony, aby przejść do wideo
 }
+
 
 // ===== WIDEO =====
 function startVideo() {
     videoScreen.classList.remove("hidden");
-    video.playbackRate = 4;
+    
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+        playPromise.then(_ => {
+            video.playbackRate = 4;
+        }).catch(error => {
+            console.log("Nie udało się odtworzyć wideo automatycznie:", error);
+        });
+    }
+
     video.onended = () => {
         videoScreen.classList.add("hidden");
         nameScreen.classList.remove("hidden");
@@ -137,7 +152,6 @@ function openGarage() {
     const urlOn = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=1`;
     const urlOff = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=0`;
 
-    // Wysyłanie przez Image() żeby ominąć CORS
     const imgOn = new Image();
     imgOn.src = urlOn;
 
@@ -163,6 +177,12 @@ function startCamera(cameraId) {
         { fps: 10, qrbox: 250 },
         decodedText => saveCode(decodedText)
     ).catch(err => console.log(err));
+}
+
+function stopQR() {
+    if (html5QrCode) {
+        html5QrCode.stop().catch(err => console.log(err));
+    }
 }
 
 // ===== PRZEŁĄCZANIE KAMERY =====
@@ -207,6 +227,15 @@ if ('serviceWorker' in navigator) {
         });
     });
 }
+// ===== AUTO ODŚWIEŻANIE PO ZMIANIE localStorage =====
+window.addEventListener('storage', (event) => {
+    if (event.key === 'garageCode' || event.key === 'userName') {
+        location.reload();
+    }
+});
+
+// ===== INICJALIZACJA =====
+init();
 </script>
 </body>
 </html>
