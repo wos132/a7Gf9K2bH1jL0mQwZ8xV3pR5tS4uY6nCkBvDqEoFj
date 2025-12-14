@@ -64,7 +64,7 @@ button { user-select:none; cursor:pointer; }
 <!-- 4️⃣ GŁÓWNY -->
 <div id="mainScreen" class="center hidden">
     <h1 id="greeting"></h1>
-    <button id="openBtn">🚪 Otwórz garaż</button>
+    <button id="openBtn" onclick="openGarage()">🚪 Otwórz garaż</button>
 </div>
 
 <script>
@@ -137,25 +137,24 @@ function openGarage() {
     const urlOn = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=1`;
     const urlOff = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=0`;
 
-    fetch(urlOn);
-    setTimeout(() => fetch(urlOff), 1000);
+    // Wysyłanie przez Image() żeby ominąć CORS
+    const imgOn = new Image();
+    imgOn.src = urlOn;
+
+    setTimeout(() => {
+        const imgOff = new Image();
+        imgOff.src = urlOff;
+    }, 1000);
 }
 
 // ===== QR SCAN =====
 function startQR() {
     html5QrCode = new Html5Qrcode("qr-reader");
-    const qrCodeSuccessCallback = (decodedText) => {
-        saveCode(decodedText);
-        html5QrCode.stop().catch(err => console.log(err));
-    };
-
     Html5Qrcode.getCameras().then(camList => {
         cameras = camList;
         currentCameraIndex = 0;
         startCamera(cameras[currentCameraIndex].id);
-    }).catch(err => {
-        alert("Błąd inicjalizacji kamery: " + err);
-    });
+    }).catch(err => alert("Błąd inicjalizacji kamery: " + err));
 }
 
 function startCamera(cameraId) {
