@@ -8,9 +8,12 @@ body { margin:0; font-family:Arial,sans-serif; background:#111; color:white; tex
 .hidden {display:none !important;}
 .center {display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh;}
 video {width:50%; max-width:420px; border-radius:12px;}
-#qrVideo {width:300px; margin-top:15px; border-radius:10px;}
+#qr-reader {width:300px; margin-top:15px; border-radius:10px;}
 input,button {padding:12px; font-size:18px; margin:8px;}
 </style>
+
+<!-- html5-qrcode -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
 
@@ -20,7 +23,7 @@ input,button {padding:12px; font-size:18px; margin:8px;}
     <input id="codeInput" placeholder="Kod">
     <button onclick="saveCode()">Zapisz kod</button>
     <h3>lub zeskanuj QR</h3>
-    <video id="qrVideo" autoplay playsinline></video>
+    <div id="qr-reader"></div>
 </div>
 
 <!-- 2️⃣ WIDEO -->
@@ -50,9 +53,8 @@ const nameScreen  = document.getElementById("nameScreen");
 const mainScreen  = document.getElementById("mainScreen");
 const video       = document.getElementById("introVideo");
 const greeting    = document.getElementById("greeting");
-const qrVideo     = document.getElementById("qrVideo");
 
-let qrStream, qrInterval;
+let html5QrCode;
 
 // **START: zawsze pokazujemy ekran kodu, jeśli brak w localStorage**
 if (!localStorage.getItem("garageCode")) {
@@ -66,8 +68,8 @@ if (!localStorage.getItem("garageCode")) {
 }
 
 // ZAPIS KODU
-function saveCode() {
-    const val = document.getElementById("codeInput").value.trim();
+function saveCode(val) {
+    val = val || document.getElementById("codeInput").value.trim();
     if (!val) return;
 
     localStorage.setItem("garageCode", val);
@@ -108,36 +110,38 @@ function openGarage() {
     const urlOn = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=1`;
     const urlOff = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=0`;
 
-    // Wysyłamy ON
     fetch(urlOn);
-
-    // Po 1s wysyłamy OFF
-    setTimeout(() => {
-        fetch(urlOff);
-    }, 1000);
+    setTimeout(() => fetch(urlOff), 1000);
 }
 
-
 // ===== QR SCAN =====
-async function startQR() {
-    if (!("BarcodeDetector" in window)) {
-        alert("Twoja przeglądarka nie obsługuje skanowania QR");
-        return;
-    }
+function startQR() {
+    html5QrCode = new Html5Qrcode("qr-reader");
+    const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+        saveCode(decodedText);
+        html5QrCode.stop().catch(err => console.log(err));
+    };
 
-    const detector = new BarcodeDetector({ formats: ["qr_code"] });
-    qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-    qrVideo.srcObject = qrStream;
-
-    qrInterval = setInterval(async () => {
-        const codes = await detector.detect(qrVideo);
-        if (codes.length) saveCode(codes[0].rawValue);
-    }, 700);
+    Html5Qrcode.getCameras().then(cameras => {
+        if (cameras && cameras.length) {
+            const cameraId = cameras[0].id;
+            html5QrCode.start(
+                cameraId,
+                { fps: 10, qrbox: 250 },
+                qrCodeSuccessCallback
+            );
+        } else {
+            alert("Nie znaleziono kamery");
+        }
+    }).catch(err => {
+        alert("Błąd inicjalizacji kamery: " + err);
+    });
 }
 
 function stopQR() {
-    clearInterval(qrInterval);
-    if (qrStream) qrStream.getTracks().forEach(t => t.stop());
+    if (html5QrCode) {
+        html5QrCode.stop().catch(err => console.log(err));
+    }
 }
 </script>
 </body>
