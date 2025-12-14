@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Garaż</title>
+<title>SGS Garaż</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#111111">
 <meta name="mobile-web-app-capable" content="yes">
@@ -23,11 +23,6 @@
     align-items:center;
     height:100vh;
   }
-  video {
-    width:50%;
-    max-width:420px;
-    border-radius:12px;
-  }
   #qr-reader {
     width:300px;
     margin-top:15px;
@@ -41,6 +36,13 @@
   button {
     user-select:none;
     cursor:pointer;
+    background:#333;
+    color:white;
+    border:none;
+    border-radius:6px;
+  }
+  button:hover {
+    background:#555;
   }
   #settingsBtn {
     position: absolute;
@@ -48,10 +50,6 @@
     right:10px;
     padding:10px 15px;
     font-size:16px;
-    background:#222;
-    color:white;
-    border:none;
-    border-radius:6px;
   }
   #settingsPanel {
     position:absolute;
@@ -67,18 +65,24 @@
   #settingsPanel input {
     width:90%;
   }
+  #animationScreen {
+    font-size:24px;
+    line-height:1.5;
+  }
+  #animationScreen div {
+    margin:20px 0;
+  }
 </style>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
-
 <!-- PRZYCISK USTAWIENIA -->
 <button id="settingsBtn">⚙ Ustawienia</button>
 <div id="settingsPanel">
   <h3>Ustawienia</h3>
   <label>Imię:</label><br>
   <input id="settingsName" type="text"><br>
-  <label>Kod garażu:</label><br>
+  <label>Kod dostępu:</label><br>
   <input id="settingsCode" type="text"><br>
   <button onclick="saveSettings()">Zapisz</button><br>
   <button onclick="resetSettings()">Resetuj ustawienia</button>
@@ -86,19 +90,17 @@
 
 <!-- 1️⃣ KOD / QR -->
 <div id="codeScreen" class="center">
-  <h2>Podaj kod dostępu</h2>
-  <input id="codeInput" placeholder="Kod">
+  <h2>Podaj kod dostępu SGS</h2>
+  <input id="codeInput" placeholder="Kod dostępu">
   <button onclick="saveCode()">Zapisz kod</button>
   <h3>lub zeskanuj QR</h3>
   <div id="qr-reader"></div>
   <button onclick="switchCamera()">Odwróć kamerę</button>
 </div>
 
-<!-- 2️⃣ WIDEO -->
-<div id="videoScreen" class="center hidden">
-  <video id="introVideo" autoplay muted playsinline>
-    <source src="logo.mp4" type="video/mp4">
-  </video>
+<!-- 2️⃣ ANIMACJA -->
+<div id="animationScreen" class="center hidden">
+  <div id="animationText">Ładowanie...</div>
 </div>
 
 <!-- 3️⃣ IMIĘ -->
@@ -111,34 +113,33 @@
 <!-- 4️⃣ GŁÓWNY -->
 <div id="mainScreen" class="center hidden">
   <h1 id="greeting"></h1>
-  <button id="openBtn" onclick="openGarage()">🚪 Otwórz garaż</button>
+  <button id="openBtn" onclick="openGarage()">🚪 Otwórz garaż SGS</button>
 </div>
 
 <script>
   const codeScreen = document.getElementById("codeScreen");
-  const videoScreen = document.getElementById("videoScreen");
+  const animationScreen = document.getElementById("animationScreen");
   const nameScreen = document.getElementById("nameScreen");
   const mainScreen = document.getElementById("mainScreen");
-  const video = document.getElementById("introVideo");
+  const codeInput = document.getElementById("codeInput");
   const greeting = document.getElementById("greeting");
   const settingsBtn = document.getElementById("settingsBtn");
   const settingsPanel = document.getElementById("settingsPanel");
   const settingsName = document.getElementById("settingsName");
   const settingsCode = document.getElementById("settingsCode");
-
   let html5QrCode;
   let cameras = [];
   let currentCameraIndex = 0;
 
   // ===== START =====
   function init() {
-    const code = localStorage.getItem("garageCode");
+    const code = localStorage.getItem("sgsCode");
     const name = localStorage.getItem("userName");
     if (!code) {
       startQR();
     } else if (!name) {
       codeScreen.classList.add("hidden");
-      startVideo();
+      showNameScreen();
     } else {
       codeScreen.classList.add("hidden");
       nameScreen.classList.add("hidden");
@@ -148,48 +149,50 @@
 
   // ===== ZAPIS KODU =====
   function saveCode(val) {
-    val = val || document.getElementById("codeInput").value.trim();
+    val = val || codeInput.value.trim();
     if (!val) return;
-    localStorage.setItem("garageCode", val);
+    localStorage.setItem("sgsCode", val);
+    codeInput.value = val;
     stopQR();
-    location.reload();
+    startAnimation();
   }
 
-  // ===== WIDEO =====
-  function startVideo() {
-  videoScreen.classList.remove("hidden");
-  video.muted = true;
-  video.playsInline = true;
+  // ===== ANIMACJA =====
+  function startAnimation() {
+    codeScreen.classList.add("hidden");
+    animationScreen.classList.remove("hidden");
+    const animationText = document.getElementById("animationText");
+    
+    const steps = [
+      { text: "PROSZĘ CZEKAĆ", delay: 0 },
+      { text: "ŁĄCZENIE Z SGS", delay: 5000 },
+      { text: "WERYFIKACJA ADRESU IP", delay: 10000 },
+      { text: "WERYFIKACJA ADRESU MAC", delay: 13000 },
+      { text: "UZYSKIWANIE KODU DOSTĘPU", delay: 16000 },
+      { text: "UZYSKANO DOSTĘP", delay: 21000 },
+      { text: "WITAM W SGS", delay: 21000 }
+    ];
 
-  // Próba automatycznego odtworzenia
-  const playPromise = video.play();
-  if (playPromise !== undefined) {
-    playPromise
-      .then(() => {
-        video.playbackRate = 4; // przyspieszenie wideo
-      })
-      .catch(error => {
-        console.log("Automatyczne odtwarzanie nie działa:", error);
-        // Tworzymy przycisk manualnego odtworzenia
-        const btn = document.createElement("button");
-        btn.innerText = "Odtwórz wideo";
-        btn.style.padding = "12px";
-        btn.style.fontSize = "18px";
-        btn.onclick = () => {
-          video.play();
-          btn.remove();
-        };
-        videoScreen.appendChild(btn);
-      });
+    let stepIndex = 0;
+    function showNextStep() {
+      if (stepIndex < steps.length) {
+        animationText.innerText = steps[stepIndex].text;
+        setTimeout(showNextStep, steps[stepIndex].delay);
+        stepIndex++;
+      } else {
+        // Po animacji pokaż ekran imienia
+        animationScreen.classList.add("hidden");
+        showNameScreen();
+      }
+    }
+    showNextStep();
   }
-
-  video.onended = () => {
-    videoScreen.classList.add("hidden");
-    nameScreen.classList.remove("hidden");
-  };
-}
 
   // ===== IMIĘ =====
+  function showNameScreen() {
+    nameScreen.classList.remove("hidden");
+  }
+
   function saveName() {
     const val = document.getElementById("nameInput").value.trim();
     if (!val) return;
@@ -206,7 +209,7 @@
 
   // ===== GARAŻ =====
   function openGarage() {
-    const token = localStorage.getItem("garageCode");
+    const token = localStorage.getItem("sgsCode");
     const urlOn = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=1`;
     const urlOff = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=0`;
     const imgOn = new Image();
@@ -237,7 +240,10 @@
     html5QrCode.start(
       cameraId,
       { fps: 10, qrbox: 250 },
-      decodedText => saveCode(decodedText)
+      decodedText => {
+        codeInput.value = decodedText;
+        saveCode(decodedText);
+      }
     ).catch(err => console.log(err));
   }
 
@@ -259,7 +265,7 @@
   // ===== USTAWIENIA =====
   settingsBtn.addEventListener('click', () => {
     settingsName.value = localStorage.getItem("userName") || "";
-    settingsCode.value = localStorage.getItem("garageCode") || "";
+    settingsCode.value = localStorage.getItem("sgsCode") || "";
     settingsPanel.style.display = settingsPanel.style.display === "none" ? "block" : "none";
   });
 
@@ -267,9 +273,11 @@
     const newName = settingsName.value.trim();
     const newCode = settingsCode.value.trim();
     if (newName) localStorage.setItem("userName", newName);
-    if (newCode) localStorage.setItem("garageCode", newCode);
+    if (newCode) localStorage.setItem("sgsCode", newCode);
     settingsPanel.style.display = "none";
-    showMain();
+    if (newName || newCode) {
+      showMain();
+    }
   }
 
   function resetSettings() {
@@ -290,7 +298,7 @@
 
   // ===== AUTO ODŚWIEŻANIE PO ZMIANIE localStorage =====
   window.addEventListener('storage', event => {
-    if (event.key === 'garageCode' || event.key === 'userName') {
+    if (event.key === 'sgsCode' || event.key === 'userName') {
       location.reload();
     }
   });
@@ -300,4 +308,3 @@
 </script>
 </body>
 </html>
-
