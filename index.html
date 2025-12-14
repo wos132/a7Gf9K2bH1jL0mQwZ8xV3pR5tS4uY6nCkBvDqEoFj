@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Garaż</title>
+<style>
+body { margin:0; font-family:Arial,sans-serif; background:#111; color:white; text-align:center;}
+.hidden {display:none !important;}
+.center {display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh;}
+video {width:50%; max-width:420px; border-radius:12px;}
+#qrVideo {width:300px; margin-top:15px; border-radius:10px;}
+input,button {padding:12px; font-size:18px; margin:8px;}
+</style>
+</head>
+<body>
+
+<!-- 1️⃣ KOD / QR -->
+<div id="codeScreen" class="center">
+    <h2>Podaj kod dostępu</h2>
+    <input id="codeInput" placeholder="Kod">
+    <button onclick="saveCode()">Zapisz kod</button>
+    <h3>lub zeskanuj QR</h3>
+    <video id="qrVideo" autoplay playsinline></video>
+</div>
+
+<!-- 2️⃣ WIDEO -->
+<div id="videoScreen" class="center hidden">
+    <video id="introVideo" autoplay muted playsinline>
+        <source src="logo.mp4" type="video/mp4">
+    </video>
+</div>
+
+<!-- 3️⃣ IMIĘ -->
+<div id="nameScreen" class="center hidden">
+    <h2>Podaj swoje imię</h2>
+    <input id="nameInput" placeholder="Imię">
+    <button onclick="saveName()">Zapisz</button>
+</div>
+
+<!-- 4️⃣ GŁÓWNY -->
+<div id="mainScreen" class="center hidden">
+    <h1 id="greeting"></h1>
+    <button onclick="openGarage()">🚪 Otwórz garaż</button>
+</div>
+
+<script>
+const codeScreen  = document.getElementById("codeScreen");
+const videoScreen = document.getElementById("videoScreen");
+const nameScreen  = document.getElementById("nameScreen");
+const mainScreen  = document.getElementById("mainScreen");
+const video       = document.getElementById("introVideo");
+const greeting    = document.getElementById("greeting");
+const qrVideo     = document.getElementById("qrVideo");
+
+let qrStream, qrInterval;
+
+// **START: zawsze pokazujemy ekran kodu, jeśli brak w localStorage**
+if (!localStorage.getItem("garageCode")) {
+    startQR(); // start skanera QR
+} else if (!localStorage.getItem("userName")) {
+    codeScreen.classList.add("hidden");
+    startVideo();
+} else {
+    codeScreen.classList.add("hidden");
+    showMain();
+}
+
+// ZAPIS KODU
+function saveCode() {
+    const val = document.getElementById("codeInput").value.trim();
+    if (!val) return;
+
+    localStorage.setItem("garageCode", val);
+    stopQR();
+    codeScreen.classList.add("hidden");
+    startVideo();
+}
+
+// WIDEO
+function startVideo() {
+    videoScreen.classList.remove("hidden");
+    video.playbackRate = 4;
+    video.onended = () => {
+        videoScreen.classList.add("hidden");
+        nameScreen.classList.remove("hidden");
+    };
+}
+
+// IMIĘ
+function saveName() {
+    const val = document.getElementById("nameInput").value.trim();
+    if (!val) return;
+
+    localStorage.setItem("userName", val);
+    nameScreen.classList.add("hidden");
+    showMain();
+}
+
+// EKRAN GŁÓWNY
+function showMain() {
+    greeting.innerText = "Dzień dobry, " + localStorage.getItem("userName");
+    mainScreen.classList.remove("hidden");
+}
+
+// GARAŻ
+function openGarage() {
+    const token = localStorage.getItem("garageCode");
+    const urlOn = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=1`;
+    const urlOff = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=0`;
+
+    // Wysyłamy ON
+    fetch(urlOn);
+
+    // Po 1s wysyłamy OFF
+    setTimeout(() => {
+        fetch(urlOff);
+    }, 1000);
+}
+
+
+// ===== QR SCAN =====
+async function startQR() {
+    if (!("BarcodeDetector" in window)) {
+        alert("Twoja przeglądarka nie obsługuje skanowania QR");
+        return;
+    }
+
+    const detector = new BarcodeDetector({ formats: ["qr_code"] });
+    qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+    qrVideo.srcObject = qrStream;
+
+    qrInterval = setInterval(async () => {
+        const codes = await detector.detect(qrVideo);
+        if (codes.length) saveCode(codes[0].rawValue);
+    }, 700);
+}
+
+function stopQR() {
+    clearInterval(qrInterval);
+    if (qrStream) qrStream.getTracks().forEach(t => t.stop());
+}
+</script>
+</body>
+</html>
