@@ -157,20 +157,37 @@
 
   // ===== WIDEO =====
   function startVideo() {
-    videoScreen.classList.remove("hidden");
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        video.playbackRate = 4;
-      }).catch(error => {
-        console.log("Nie udało się odtworzyć wideo automatycznie:", error);
+  videoScreen.classList.remove("hidden");
+  video.muted = true;
+  video.playsInline = true;
+
+  // Próba automatycznego odtworzenia
+  const playPromise = video.play();
+  if (playPromise !== undefined) {
+    playPromise
+      .then(() => {
+        video.playbackRate = 4; // przyspieszenie wideo
+      })
+      .catch(error => {
+        console.log("Automatyczne odtwarzanie nie działa:", error);
+        // Tworzymy przycisk manualnego odtworzenia
+        const btn = document.createElement("button");
+        btn.innerText = "Odtwórz wideo";
+        btn.style.padding = "12px";
+        btn.style.fontSize = "18px";
+        btn.onclick = () => {
+          video.play();
+          btn.remove();
+        };
+        videoScreen.appendChild(btn);
       });
-    }
-    video.onended = () => {
-      videoScreen.classList.add("hidden");
-      nameScreen.classList.remove("hidden");
-    };
   }
+
+  video.onended = () => {
+    videoScreen.classList.add("hidden");
+    nameScreen.classList.remove("hidden");
+  };
+}
 
   // ===== IMIĘ =====
   function saveName() {
@@ -283,3 +300,4 @@
 </script>
 </body>
 </html>
+
