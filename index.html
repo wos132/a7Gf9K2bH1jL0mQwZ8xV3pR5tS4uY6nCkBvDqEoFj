@@ -72,15 +72,19 @@
     background: #555;
   }
 
-  /* Przycisk ustawień */
+  /* Przycisk ustawień – specjalnie mniejszy i dyskretny */
   #settingsBtn {
     position: absolute;
     top: 12px;
     right: 12px;
-    padding: 14px 18px;
-    font-size: 1.3em;
+    padding: 8px 12px;           /* mniejszy padding */
+    font-size: 1em;              /* mniejsza czcionka */
+    min-width: unset;
+    width: auto;
     z-index: 100;
-    border-radius: 12px;
+    border-radius: 10px;
+    background: rgba(51, 51, 51, 0.7);
+    backdrop-filter: blur(4px);
   }
 
   /* Panel ustawień */
@@ -168,7 +172,7 @@
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
-<!-- PRZYCISK USTAWIENIA -->
+<!-- PRZYCISK USTAWIENIA – teraz mały -->
 <button id="settingsBtn">⚙ Ustawienia</button>
 
 <div id="settingsPanel">
@@ -181,7 +185,7 @@
   <button onclick="resetSettings()">Resetuj ustawienia</button>
 </div>
 
-<!-- 1️⃣ KOD / QR -->
+<!-- Pozostała część bez zmian -->
 <div id="codeScreen" class="center">
   <h2>Podaj kod dostępu SGS</h2>
   <input id="codeInput" placeholder="Kod dostępu">
@@ -191,25 +195,22 @@
   <button onclick="switchCamera()">Odwróć kamerę</button>
 </div>
 
-<!-- 2️⃣ ANIMACJA -->
 <div id="animationScreen" class="center hidden">
   <div id="animationText">Ładowanie...</div>
 </div>
 
-<!-- 3️⃣ IMIĘ -->
 <div id="nameScreen" class="center hidden">
   <h2>Podaj swoje imię</h2>
   <input id="nameInput" placeholder="Imię">
   <button onclick="saveName()">Zapisz</button>
 </div>
 
-<!-- 4️⃣ GŁÓWNY -->
 <div id="mainScreen" class="center hidden">
   <h1 id="greeting"></h1>
   <button id="openBtn" onclick="openGarage()">🚪 Otwórz garaż SGS</button>
 </div>
 
-<!-- Cały oryginalny JavaScript bez zmian -->
+<!-- JavaScript bez żadnych zmian -->
 <script>
   const codeScreen = document.getElementById("codeScreen");
   const animationScreen = document.getElementById("animationScreen");
