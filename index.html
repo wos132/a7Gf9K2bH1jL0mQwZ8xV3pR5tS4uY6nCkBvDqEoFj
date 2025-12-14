@@ -7,70 +7,162 @@
 <meta name="theme-color" content="#111111">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
   body {
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#111;
-    color:white;
-    text-align:center;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+    text-align: center;
+    min-height: 100vh;
+    overflow-x: hidden;
   }
-  .hidden { display:none !important; }
+
+  .hidden { display: none !important; }
+
   .center {
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
   }
-  #qr-reader {
-    width:300px;
-    margin-top:15px;
-    border-radius:10px;
+
+  h1, h2, h3 {
+    margin: 15px 0;
+    font-weight: normal;
   }
+
+  h1 { font-size: 2.2em; }
+  h2 { font-size: 1.8em; }
+  h3 { font-size: 1.4em; }
+
   input, button {
-    padding:12px;
-    font-size:18px;
-    margin:8px;
+    width: 90%;
+    max-width: 400px;
+    padding: 18px;
+    font-size: 1.4em;
+    margin: 12px 0;
+    border-radius: 12px;
+    box-sizing: border-box;
   }
+
+  input {
+    background: #333;
+    border: 1px solid #555;
+    color: white;
+  }
+
+  input::placeholder {
+    color: #aaa;
+  }
+
   button {
-    user-select:none;
-    cursor:pointer;
-    background:#333;
-    color:white;
-    border:none;
-    border-radius:6px;
+    user-select: none;
+    cursor: pointer;
+    background: #333;
+    color: white;
+    border: none;
   }
-  button:hover {
-    background:#555;
+
+  button:hover, button:active {
+    background: #555;
   }
+
+  /* Przycisk ustawień */
   #settingsBtn {
     position: absolute;
-    top:10px;
-    right:10px;
-    padding:10px 15px;
-    font-size:16px;
+    top: 12px;
+    right: 12px;
+    padding: 14px 18px;
+    font-size: 1.3em;
+    z-index: 100;
+    border-radius: 12px;
   }
+
+  /* Panel ustawień */
   #settingsPanel {
-    position:absolute;
-    top:50px;
-    right:10px;
-    background:#222;
-    padding:20px;
-    border-radius:10px;
-    display:none;
-    width:280px;
-    z-index:10;
+    position: absolute;
+    top: 70px;
+    right: 12px;
+    background: #222;
+    padding: 25px;
+    border-radius: 16px;
+    display: none;
+    width: 90%;
+    max-width: 380px;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
   }
+
+  #settingsPanel h3 {
+    font-size: 1.6em;
+    margin-bottom: 20px;
+  }
+
+  #settingsPanel label {
+    display: block;
+    text-align: left;
+    margin: 15px 0 8px;
+    font-size: 1.2em;
+  }
+
   #settingsPanel input {
-    width:90%;
+    width: 100%;
+    font-size: 1.3em;
+    padding: 16px;
   }
+
+  #settingsPanel button {
+    width: 100%;
+    margin-top: 15px;
+  }
+
+  /* Czytnik QR */
+  #qr-reader {
+    width: 90vw;
+    max-width: 400px;
+    height: 90vw;
+    max-height: 400px;
+    margin: 20px 0;
+    border-radius: 16px;
+    border: 4px solid #333;
+    background: #000;
+  }
+
+  /* Przycisk odwrócenia kamery */
+  button[onclick="switchCamera()"] {
+    font-size: 1.2em;
+    padding: 14px;
+  }
+
+  /* Ekran animacji */
   #animationScreen {
-    font-size:24px;
-    line-height:1.5;
+    font-size: 1.8em;
+    line-height: 1.6;
   }
+
   #animationScreen div {
-    margin:20px 0;
+    margin: 30px 0;
+  }
+
+  /* Główny przycisk otwarcia garażu */
+  #openBtn {
+    font-size: 1.6em;
+    padding: 22px;
+    margin-top: 40px;
+    border-radius: 16px;
+  }
+
+  /* Dodatkowe dostosowanie dla bardzo małych ekranów */
+  @media (max-width: 360px) {
+    h1 { font-size: 2em; }
+    h2 { font-size: 1.6em; }
+    input, button { font-size: 1.3em; padding: 16px; }
+    #qr-reader { width: 95vw; height: 95vw; }
   }
 </style>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -78,13 +170,14 @@
 <body>
 <!-- PRZYCISK USTAWIENIA -->
 <button id="settingsBtn">⚙ Ustawienia</button>
+
 <div id="settingsPanel">
   <h3>Ustawienia</h3>
-  <label>Imię:</label><br>
-  <input id="settingsName" type="text"><br>
-  <label>Kod dostępu:</label><br>
-  <input id="settingsCode" type="text"><br>
-  <button onclick="saveSettings()">Zapisz</button><br>
+  <label>Imię:</label>
+  <input id="settingsName" type="text">
+  <label>Kod dostępu:</label>
+  <input id="settingsCode" type="text">
+  <button onclick="saveSettings()">Zapisz</button>
   <button onclick="resetSettings()">Resetuj ustawienia</button>
 </div>
 
@@ -116,6 +209,7 @@
   <button id="openBtn" onclick="openGarage()">🚪 Otwórz garaż SGS</button>
 </div>
 
+<!-- Cały oryginalny JavaScript bez zmian -->
 <script>
   const codeScreen = document.getElementById("codeScreen");
   const animationScreen = document.getElementById("animationScreen");
@@ -131,7 +225,6 @@
   let cameras = [];
   let currentCameraIndex = 0;
 
-  // ===== START =====
   function init() {
     const code = localStorage.getItem("sgsCode");
     const name = localStorage.getItem("userName");
@@ -147,7 +240,6 @@
     }
   }
 
-  // ===== ZAPIS KODU =====
   function saveCode(val) {
     val = val || codeInput.value.trim();
     if (!val) return;
@@ -157,12 +249,11 @@
     startAnimation();
   }
 
-  // ===== ANIMACJA =====
   function startAnimation() {
     codeScreen.classList.add("hidden");
     animationScreen.classList.remove("hidden");
     const animationText = document.getElementById("animationText");
-    
+   
     const steps = [
       { text: "PROSZĘ CZEKAĆ", delay: 2000 },
       { text: "ŁĄCZENIE Z SGS", delay: 2000 },
@@ -172,7 +263,6 @@
       { text: "UZYSKANO DOSTĘP", delay: 1500 },
       { text: "WITAM W SGS", delay: 2000 }
     ];
-
     let stepIndex = 0;
     function showNextStep() {
       if (stepIndex < steps.length) {
@@ -180,7 +270,6 @@
         setTimeout(showNextStep, steps[stepIndex].delay);
         stepIndex++;
       } else {
-        // Po animacji pokaż ekran imienia
         animationScreen.classList.add("hidden");
         showNameScreen();
       }
@@ -188,7 +277,6 @@
     showNextStep();
   }
 
-  // ===== IMIĘ =====
   function showNameScreen() {
     nameScreen.classList.remove("hidden");
   }
@@ -201,13 +289,11 @@
     showMain();
   }
 
-  // ===== EKRAN GŁÓWNY =====
   function showMain() {
     greeting.innerText = "Dzień dobry, " + localStorage.getItem("userName");
     mainScreen.classList.remove("hidden");
   }
 
-  // ===== GARAŻ =====
   function openGarage() {
     const token = localStorage.getItem("sgsCode");
     const urlOn = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=1`;
@@ -220,7 +306,6 @@
     }, 1000);
   }
 
-  // ===== QR SCAN =====
   function startQR() {
     html5QrCode = new Html5Qrcode("qr-reader");
     Html5Qrcode.getCameras()
@@ -239,7 +324,7 @@
   function startCamera(cameraId) {
     html5QrCode.start(
       cameraId,
-      { fps: 10, qrbox: 250 },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
       decodedText => {
         codeInput.value = decodedText;
         saveCode(decodedText);
@@ -253,7 +338,6 @@
     }
   }
 
-  // ===== PRZEŁĄCZANIE KAMERY =====
   function switchCamera() {
     if (!cameras.length) return;
     html5QrCode.stop().then(() => {
@@ -262,7 +346,6 @@
     }).catch(err => console.log(err));
   }
 
-  // ===== USTAWIENIA =====
   settingsBtn.addEventListener('click', () => {
     settingsName.value = localStorage.getItem("userName") || "";
     settingsCode.value = localStorage.getItem("sgsCode") || "";
@@ -287,7 +370,6 @@
     }
   }
 
-  // ===== SERVICE WORKER =====
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
       navigator.serviceWorker.register('service-worker.js')
@@ -296,16 +378,13 @@
     });
   }
 
-  // ===== AUTO ODŚWIEŻANIE PO ZMIANIE localStorage =====
   window.addEventListener('storage', event => {
     if (event.key === 'sgsCode' || event.key === 'userName') {
       location.reload();
     }
   });
 
-  // ===== INICJALIZACJA =====
   init();
 </script>
 </body>
 </html>
-
