@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Garaż</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111111">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#111; color:white; text-align:center; }
 .hidden { display:none !important; }
@@ -191,6 +196,17 @@ function resetSettings() {
         localStorage.clear();
         location.reload();
     }
+}
+
+// ===== REJESTRACJA SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('service-worker.js').then(function(registration) {
+            console.log('Service Worker zarejestrowany:', registration);
+        }).catch(function(err) {
+            console.log('Błąd rejestracji Service Workera:', err);
+        });
+    });
 }
 </script>
 </body>
