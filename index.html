@@ -16,7 +16,6 @@ button { user-select:none; cursor:pointer; }
 #settingsPanel input { width:90%; }
 </style>
 
-<!-- html5-qrcode -->
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
@@ -29,7 +28,8 @@ button { user-select:none; cursor:pointer; }
     <input id="settingsName" type="text"><br>
     <label>Kod garażu:</label><br>
     <input id="settingsCode" type="text"><br>
-    <button onclick="saveSettings()">Zapisz</button>
+    <button onclick="saveSettings()">Zapisz</button><br>
+    <button onclick="resetSettings()">Resetuj ustawienia</button>
 </div>
 
 <!-- 1️⃣ KOD / QR -->
@@ -79,7 +79,6 @@ const settingsCode   = document.getElementById("settingsCode");
 let html5QrCode;
 let cameras = [];
 let currentCameraIndex = 0;
-let longPressTimer;
 
 // ===== START =====
 if (!localStorage.getItem("garageCode")) {
@@ -137,25 +136,6 @@ function openGarage() {
     setTimeout(() => fetch(urlOff), 1000);
 }
 
-// ===== DŁUGIE PRZYTRZYMANIE =====
-openBtn.addEventListener('mousedown', startLongPress);
-openBtn.addEventListener('touchstart', startLongPress);
-openBtn.addEventListener('mouseup', cancelLongPress);
-openBtn.addEventListener('touchend', cancelLongPress);
-
-function startLongPress() {
-    longPressTimer = setTimeout(() => {
-        if (confirm("Czy chcesz zresetować ustawienia?")) {
-            localStorage.clear();
-            location.reload();
-        }
-    }, 1500);
-}
-
-function cancelLongPress() {
-    clearTimeout(longPressTimer);
-}
-
 // ===== QR SCAN =====
 function startQR() {
     html5QrCode = new Html5Qrcode("qr-reader");
@@ -192,7 +172,6 @@ function switchCamera() {
 
 // ===== USTAWIENIA =====
 settingsBtn.addEventListener('click', () => {
-    // wypełniamy inputy aktualnymi wartościami
     settingsName.value = localStorage.getItem("userName") || "";
     settingsCode.value = localStorage.getItem("garageCode") || "";
     settingsPanel.style.display = settingsPanel.style.display === "none" ? "block" : "none";
@@ -205,6 +184,13 @@ function saveSettings() {
     if (newCode) localStorage.setItem("garageCode", newCode);
     settingsPanel.style.display = "none";
     showMain();
+}
+
+function resetSettings() {
+    if (confirm("Czy na pewno chcesz zresetować wszystkie ustawienia?")) {
+        localStorage.clear();
+        location.reload();
+    }
 }
 </script>
 </body>
