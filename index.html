@@ -9,16 +9,92 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
 <style>
-body { margin:0; font-family:Arial,sans-serif; background:#111; color:white; text-align:center; }
-.hidden { display:none !important; }
-.center { display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; }
-video { width:50%; max-width:420px; border-radius:12px; }
-#qr-reader { width:300px; margin-top:15px; border-radius:10px; }
-input, button { padding:12px; font-size:18px; margin:8px; }
-button { user-select:none; cursor:pointer; }
-#settingsBtn { position: absolute; top:10px; right:10px; padding:10px 15px; font-size:16px; background:#222; color:white; border:none; border-radius:6px; }
-#settingsPanel { position:absolute; top:50px; right:10px; background:#222; padding:20px; border-radius:10px; display:none; width:280px; z-index:10; }
-#settingsPanel input { width:90%; }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+    text-align: center;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+video {
+    width: 90%;
+    max-width: 600px;
+    border-radius: 12px;
+}
+
+#qr-reader {
+    width: 90%;
+    max-width: 400px;
+    margin-top: 15px;
+    border-radius: 10px;
+}
+
+input, button {
+    padding: 16px;
+    font-size: 20px;
+    margin: 10px;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+button {
+    user-select: none;
+    cursor: pointer;
+    background: #222;
+    color: white;
+    border: none;
+}
+
+#settingsBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 12px 18px;
+    font-size: 18px;
+    background: #222;
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
+
+#settingsPanel {
+    position: absolute;
+    top: 60px;
+    right: 10px;
+    background: #222;
+    padding: 20px;
+    border-radius: 10px;
+    display: none;
+    width: 95%;
+    max-width: 320px;
+    z-index: 10;
+}
+
+#settingsPanel input {
+    width: 100%;
+    margin-bottom: 10px;
+}
 </style>
 
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -107,10 +183,9 @@ function saveCode(val) {
     val = val || document.getElementById("codeInput").value.trim();
     if (!val) return;
     localStorage.setItem("garageCode", val);
-    stopQR();           // zatrzymanie skanera QR
-    location.reload();  // odświeżenie strony, aby przejść do wideo
+    stopQR();
+    location.reload(); // odświeżenie strony, aby przejść do wideo
 }
-
 
 // ===== WIDEO =====
 function startVideo() {
@@ -136,8 +211,7 @@ function saveName() {
     const val = document.getElementById("nameInput").value.trim();
     if (!val) return;
     localStorage.setItem("userName", val);
-    nameScreen.classList.add("hidden");
-    showMain();
+    location.reload(); // odświeżenie strony, aby pokazać ekran główny
 }
 
 // ===== EKRAN GŁÓWNY =====
@@ -227,12 +301,6 @@ if ('serviceWorker' in navigator) {
         });
     });
 }
-// ===== AUTO ODŚWIEŻANIE PO ZMIANIE localStorage =====
-window.addEventListener('storage', (event) => {
-    if (event.key === 'garageCode' || event.key === 'userName') {
-        location.reload();
-    }
-});
 
 // ===== INICJALIZACJA =====
 init();
