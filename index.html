@@ -10,6 +10,7 @@ body { margin:0; font-family:Arial,sans-serif; background:#111; color:white; tex
 video {width:50%; max-width:420px; border-radius:12px;}
 #qr-reader {width:300px; margin-top:15px; border-radius:10px;}
 input,button {padding:12px; font-size:18px; margin:8px;}
+button {user-select:none;}
 </style>
 
 <!-- html5-qrcode -->
@@ -43,7 +44,7 @@ input,button {padding:12px; font-size:18px; margin:8px;}
 <!-- 4️⃣ GŁÓWNY -->
 <div id="mainScreen" class="center hidden">
     <h1 id="greeting"></h1>
-    <button onclick="openGarage()">🚪 Otwórz garaż</button>
+    <button id="openBtn">🚪 Otwórz garaż</button>
 </div>
 
 <script>
@@ -53,12 +54,14 @@ const nameScreen  = document.getElementById("nameScreen");
 const mainScreen  = document.getElementById("mainScreen");
 const video       = document.getElementById("introVideo");
 const greeting    = document.getElementById("greeting");
+const openBtn     = document.getElementById("openBtn");
 
 let html5QrCode;
+let longPressTimer;
 
-// **START: zawsze pokazujemy ekran kodu, jeśli brak w localStorage**
+// **START**
 if (!localStorage.getItem("garageCode")) {
-    startQR(); // start skanera QR
+    startQR(); 
 } else if (!localStorage.getItem("userName")) {
     codeScreen.classList.add("hidden");
     startVideo();
@@ -114,6 +117,25 @@ function openGarage() {
     setTimeout(() => fetch(urlOff), 1000);
 }
 
+// ===== DŁUGIE PRZYTRZYMANIE DO RESETU =====
+openBtn.addEventListener('mousedown', startLongPress);
+openBtn.addEventListener('touchstart', startLongPress);
+openBtn.addEventListener('mouseup', cancelLongPress);
+openBtn.addEventListener('touchend', cancelLongPress);
+
+function startLongPress() {
+    longPressTimer = setTimeout(() => {
+        if (confirm("Czy chcesz zresetować ustawienia?")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }, 1500); // 1,5 sekundy przytrzymania
+}
+
+function cancelLongPress() {
+    clearTimeout(longPressTimer);
+}
+
 // ===== QR SCAN =====
 function startQR() {
     html5QrCode = new Html5Qrcode("qr-reader");
@@ -123,16 +145,13 @@ function startQR() {
     };
 
     Html5Qrcode.getCameras().then(cameras => {
-        if (cameras && cameras.length) {
-            const cameraId = cameras[0].id;
-            html5QrCode.start(
-                cameraId,
-                { fps: 10, qrbox: 250 },
-                qrCodeSuccessCallback
-            );
-        } else {
-            alert("Nie znaleziono kamery");
-        }
+        // Wybieramy tylną kamerę
+        const rearCamera = cameras.find(cam => cam.label.toLowerCase().includes("back")) || cameras[0];
+        html5QrCode.start(
+            rearCamera.id,
+            { fps: 10, qrbox: 250 },
+            qrCodeSuccessCallback
+        );
     }).catch(err => {
         alert("Błąd inicjalizacji kamery: " + err);
     });
