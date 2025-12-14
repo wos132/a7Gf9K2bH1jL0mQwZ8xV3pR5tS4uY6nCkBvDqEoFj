@@ -25,6 +25,7 @@ button {user-select:none;}
     <button onclick="saveCode()">Zapisz kod</button>
     <h3>lub zeskanuj QR</h3>
     <div id="qr-reader"></div>
+    <button onclick="switchCamera()">Odwróć kamerę</button>
 </div>
 
 <!-- 2️⃣ WIDEO -->
@@ -57,6 +58,8 @@ const greeting    = document.getElementById("greeting");
 const openBtn     = document.getElementById("openBtn");
 
 let html5QrCode;
+let cameras = [];
+let currentCameraIndex = 0;
 let longPressTimer;
 
 // **START**
@@ -144,17 +147,30 @@ function startQR() {
         html5QrCode.stop().catch(err => console.log(err));
     };
 
-    Html5Qrcode.getCameras().then(cameras => {
-        // Wybieramy tylną kamerę
-        const rearCamera = cameras.find(cam => cam.label.toLowerCase().includes("back")) || cameras[0];
-        html5QrCode.start(
-            rearCamera.id,
-            { fps: 10, qrbox: 250 },
-            qrCodeSuccessCallback
-        );
+    Html5Qrcode.getCameras().then(camList => {
+        cameras = camList;
+        currentCameraIndex = 0;
+        startCamera(cameras[currentCameraIndex].id);
     }).catch(err => {
         alert("Błąd inicjalizacji kamery: " + err);
     });
+}
+
+function startCamera(cameraId) {
+    html5QrCode.start(
+        cameraId,
+        { fps: 10, qrbox: 250 },
+        decodedText => saveCode(decodedText)
+    ).catch(err => console.log(err));
+}
+
+// Funkcja do przełączenia kamery
+function switchCamera() {
+    if (!cameras.length) return;
+    html5QrCode.stop().then(() => {
+        currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+        startCamera(cameras[currentCameraIndex].id);
+    }).catch(err => console.log(err));
 }
 
 function stopQR() {
