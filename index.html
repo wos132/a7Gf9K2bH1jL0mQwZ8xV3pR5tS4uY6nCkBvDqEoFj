@@ -7,96 +7,67 @@
 <meta name="theme-color" content="#111111">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-
 <style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #111;
-    color: white;
-    text-align: center;
-    height: 100vh;
-    width: 100vw;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    box-sizing: border-box;
-}
-
-.center {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-}
-
-video {
-    width: 90%;
-    max-width: 600px;
-    border-radius: 12px;
-}
-
-#qr-reader {
-    width: 90%;
-    max-width: 400px;
-    margin-top: 15px;
-    border-radius: 10px;
-}
-
-input, button {
-    padding: 16px;
-    font-size: 20px;
-    margin: 10px;
-    width: 90%;
-    max-width: 400px;
-    border-radius: 8px;
-    box-sizing: border-box;
-}
-
-button {
-    user-select: none;
-    cursor: pointer;
-    background: #222;
-    color: white;
-    border: none;
-}
-
-#settingsBtn {
+  body {
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#111;
+    color:white;
+    text-align:center;
+  }
+  .hidden { display:none !important; }
+  .center {
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+  }
+  video {
+    width:50%;
+    max-width:420px;
+    border-radius:12px;
+  }
+  #qr-reader {
+    width:300px;
+    margin-top:15px;
+    border-radius:10px;
+  }
+  input, button {
+    padding:12px;
+    font-size:18px;
+    margin:8px;
+  }
+  button {
+    user-select:none;
+    cursor:pointer;
+  }
+  #settingsBtn {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    padding: 12px 18px;
-    font-size: 18px;
-    background: #222;
-    color: white;
-    border: none;
-    border-radius: 8px;
-}
-
-#settingsPanel {
-    position: absolute;
-    top: 60px;
-    right: 10px;
-    background: #222;
-    padding: 20px;
-    border-radius: 10px;
-    display: none;
-    width: 95%;
-    max-width: 320px;
-    z-index: 10;
-}
-
-#settingsPanel input {
-    width: 100%;
-    margin-bottom: 10px;
-}
+    top:10px;
+    right:10px;
+    padding:10px 15px;
+    font-size:16px;
+    background:#222;
+    color:white;
+    border:none;
+    border-radius:6px;
+  }
+  #settingsPanel {
+    position:absolute;
+    top:50px;
+    right:10px;
+    background:#222;
+    padding:20px;
+    border-radius:10px;
+    display:none;
+    width:280px;
+    z-index:10;
+  }
+  #settingsPanel input {
+    width:90%;
+  }
 </style>
-
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
@@ -104,206 +75,211 @@ button {
 <!-- PRZYCISK USTAWIENIA -->
 <button id="settingsBtn">⚙ Ustawienia</button>
 <div id="settingsPanel">
-    <h3>Ustawienia</h3>
-    <label>Imię:</label><br>
-    <input id="settingsName" type="text"><br>
-    <label>Kod garażu:</label><br>
-    <input id="settingsCode" type="text"><br>
-    <button onclick="saveSettings()">Zapisz</button><br>
-    <button onclick="resetSettings()">Resetuj ustawienia</button>
+  <h3>Ustawienia</h3>
+  <label>Imię:</label><br>
+  <input id="settingsName" type="text"><br>
+  <label>Kod garażu:</label><br>
+  <input id="settingsCode" type="text"><br>
+  <button onclick="saveSettings()">Zapisz</button><br>
+  <button onclick="resetSettings()">Resetuj ustawienia</button>
 </div>
 
 <!-- 1️⃣ KOD / QR -->
 <div id="codeScreen" class="center">
-    <h2>Podaj kod dostępu</h2>
-    <input id="codeInput" placeholder="Kod">
-    <button onclick="saveCode()">Zapisz kod</button>
-    <h3>lub zeskanuj QR</h3>
-    <div id="qr-reader"></div>
-    <button onclick="switchCamera()">Odwróć kamerę</button>
+  <h2>Podaj kod dostępu</h2>
+  <input id="codeInput" placeholder="Kod">
+  <button onclick="saveCode()">Zapisz kod</button>
+  <h3>lub zeskanuj QR</h3>
+  <div id="qr-reader"></div>
+  <button onclick="switchCamera()">Odwróć kamerę</button>
 </div>
 
 <!-- 2️⃣ WIDEO -->
 <div id="videoScreen" class="center hidden">
-    <video id="introVideo" autoplay muted playsinline>
-        <source src="logo.mp4" type="video/mp4">
-    </video>
+  <video id="introVideo" autoplay muted playsinline>
+    <source src="logo.mp4" type="video/mp4">
+  </video>
 </div>
 
 <!-- 3️⃣ IMIĘ -->
 <div id="nameScreen" class="center hidden">
-    <h2>Podaj swoje imię</h2>
-    <input id="nameInput" placeholder="Imię">
-    <button onclick="saveName()">Zapisz</button>
+  <h2>Podaj swoje imię</h2>
+  <input id="nameInput" placeholder="Imię">
+  <button onclick="saveName()">Zapisz</button>
 </div>
 
 <!-- 4️⃣ GŁÓWNY -->
 <div id="mainScreen" class="center hidden">
-    <h1 id="greeting"></h1>
-    <button id="openBtn" onclick="openGarage()">🚪 Otwórz garaż</button>
+  <h1 id="greeting"></h1>
+  <button id="openBtn" onclick="openGarage()">🚪 Otwórz garaż</button>
 </div>
 
 <script>
-const codeScreen  = document.getElementById("codeScreen");
-const videoScreen = document.getElementById("videoScreen");
-const nameScreen  = document.getElementById("nameScreen");
-const mainScreen  = document.getElementById("mainScreen");
-const video       = document.getElementById("introVideo");
-const greeting    = document.getElementById("greeting");
-const openBtn     = document.getElementById("openBtn");
+  const codeScreen = document.getElementById("codeScreen");
+  const videoScreen = document.getElementById("videoScreen");
+  const nameScreen = document.getElementById("nameScreen");
+  const mainScreen = document.getElementById("mainScreen");
+  const video = document.getElementById("introVideo");
+  const greeting = document.getElementById("greeting");
+  const settingsBtn = document.getElementById("settingsBtn");
+  const settingsPanel = document.getElementById("settingsPanel");
+  const settingsName = document.getElementById("settingsName");
+  const settingsCode = document.getElementById("settingsCode");
 
-const settingsBtn    = document.getElementById("settingsBtn");
-const settingsPanel  = document.getElementById("settingsPanel");
-const settingsName   = document.getElementById("settingsName");
-const settingsCode   = document.getElementById("settingsCode");
+  let html5QrCode;
+  let cameras = [];
+  let currentCameraIndex = 0;
 
-let html5QrCode;
-let cameras = [];
-let currentCameraIndex = 0;
-
-// ===== START =====
-function init() {
+  // ===== START =====
+  function init() {
     const code = localStorage.getItem("garageCode");
     const name = localStorage.getItem("userName");
-
     if (!code) {
-        startQR();
+      startQR();
     } else if (!name) {
-        codeScreen.classList.add("hidden");
-        startVideo();
+      codeScreen.classList.add("hidden");
+      startVideo();
     } else {
-        codeScreen.classList.add("hidden");
-        nameScreen.classList.add("hidden");
-        showMain();
+      codeScreen.classList.add("hidden");
+      nameScreen.classList.add("hidden");
+      showMain();
     }
-}
+  }
 
-// ===== ZAPIS KODU =====
-function saveCode(val) {
+  // ===== ZAPIS KODU =====
+  function saveCode(val) {
     val = val || document.getElementById("codeInput").value.trim();
     if (!val) return;
     localStorage.setItem("garageCode", val);
     stopQR();
-    location.reload(); // odświeżenie strony, aby przejść do wideo
-}
+    location.reload();
+  }
 
-// ===== WIDEO =====
-function startVideo() {
+  // ===== WIDEO =====
+  function startVideo() {
     videoScreen.classList.remove("hidden");
-    
     const playPromise = video.play();
     if (playPromise !== undefined) {
-        playPromise.then(_ => {
-            video.playbackRate = 4;
-        }).catch(error => {
-            console.log("Nie udało się odtworzyć wideo automatycznie:", error);
-        });
+      playPromise.then(() => {
+        video.playbackRate = 4;
+      }).catch(error => {
+        console.log("Nie udało się odtworzyć wideo automatycznie:", error);
+      });
     }
-
     video.onended = () => {
-        videoScreen.classList.add("hidden");
-        nameScreen.classList.remove("hidden");
+      videoScreen.classList.add("hidden");
+      nameScreen.classList.remove("hidden");
     };
-}
+  }
 
-// ===== IMIĘ =====
-function saveName() {
+  // ===== IMIĘ =====
+  function saveName() {
     const val = document.getElementById("nameInput").value.trim();
     if (!val) return;
     localStorage.setItem("userName", val);
-    location.reload(); // odświeżenie strony, aby pokazać ekran główny
-}
+    nameScreen.classList.add("hidden");
+    showMain();
+  }
 
-// ===== EKRAN GŁÓWNY =====
-function showMain() {
+  // ===== EKRAN GŁÓWNY =====
+  function showMain() {
     greeting.innerText = "Dzień dobry, " + localStorage.getItem("userName");
     mainScreen.classList.remove("hidden");
-}
+  }
 
-// ===== GARAŻ =====
-function openGarage() {
+  // ===== GARAŻ =====
+  function openGarage() {
     const token = localStorage.getItem("garageCode");
     const urlOn = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=1`;
     const urlOff = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=0`;
-
     const imgOn = new Image();
     imgOn.src = urlOn;
-
     setTimeout(() => {
-        const imgOff = new Image();
-        imgOff.src = urlOff;
+      const imgOff = new Image();
+      imgOff.src = urlOff;
     }, 1000);
-}
+  }
 
-// ===== QR SCAN =====
-function startQR() {
+  // ===== QR SCAN =====
+  function startQR() {
     html5QrCode = new Html5Qrcode("qr-reader");
-    Html5Qrcode.getCameras().then(camList => {
+    Html5Qrcode.getCameras()
+      .then(camList => {
         cameras = camList;
-        currentCameraIndex = 0;
-        startCamera(cameras[currentCameraIndex].id);
-    }).catch(err => alert("Błąd inicjalizacji kamery: " + err));
-}
+        if (cameras.length > 0) {
+          currentCameraIndex = 0;
+          startCamera(cameras[currentCameraIndex].id);
+        } else {
+          alert("Nie znaleziono kamer.");
+        }
+      })
+      .catch(err => alert("Błąd inicjalizacji kamery: " + err));
+  }
 
-function startCamera(cameraId) {
+  function startCamera(cameraId) {
     html5QrCode.start(
-        cameraId,
-        { fps: 10, qrbox: 250 },
-        decodedText => saveCode(decodedText)
+      cameraId,
+      { fps: 10, qrbox: 250 },
+      decodedText => saveCode(decodedText)
     ).catch(err => console.log(err));
-}
+  }
 
-function stopQR() {
+  function stopQR() {
     if (html5QrCode) {
-        html5QrCode.stop().catch(err => console.log(err));
+      html5QrCode.stop().catch(err => console.log(err));
     }
-}
+  }
 
-// ===== PRZEŁĄCZANIE KAMERY =====
-function switchCamera() {
+  // ===== PRZEŁĄCZANIE KAMERY =====
+  function switchCamera() {
     if (!cameras.length) return;
     html5QrCode.stop().then(() => {
-        currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
-        startCamera(cameras[currentCameraIndex].id);
+      currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+      startCamera(cameras[currentCameraIndex].id);
     }).catch(err => console.log(err));
-}
+  }
 
-// ===== USTAWIENIA =====
-settingsBtn.addEventListener('click', () => {
+  // ===== USTAWIENIA =====
+  settingsBtn.addEventListener('click', () => {
     settingsName.value = localStorage.getItem("userName") || "";
     settingsCode.value = localStorage.getItem("garageCode") || "";
     settingsPanel.style.display = settingsPanel.style.display === "none" ? "block" : "none";
-});
+  });
 
-function saveSettings() {
+  function saveSettings() {
     const newName = settingsName.value.trim();
     const newCode = settingsCode.value.trim();
     if (newName) localStorage.setItem("userName", newName);
     if (newCode) localStorage.setItem("garageCode", newCode);
     settingsPanel.style.display = "none";
     showMain();
-}
+  }
 
-function resetSettings() {
+  function resetSettings() {
     if (confirm("Czy na pewno chcesz zresetować wszystkie ustawienia?")) {
-        localStorage.clear();
-        location.reload();
+      localStorage.clear();
+      location.reload();
     }
-}
+  }
 
-// ===== REJESTRACJA SERVICE WORKER =====
-if ('serviceWorker' in navigator) {
+  // ===== SERVICE WORKER =====
+  if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-        navigator.serviceWorker.register('service-worker.js').then(function(registration) {
-            console.log('Service Worker zarejestrowany:', registration);
-        }).catch(function(err) {
-            console.log('Błąd rejestracji Service Workera:', err);
-        });
+      navigator.serviceWorker.register('service-worker.js')
+        .then(registration => console.log('Service Worker zarejestrowany:', registration))
+        .catch(err => console.log('Błąd rejestracji Service Workera:', err));
     });
-}
+  }
 
-// ===== INICJALIZACJA =====
-init();
+  // ===== AUTO ODŚWIEŻANIE PO ZMIANIE localStorage =====
+  window.addEventListener('storage', event => {
+    if (event.key === 'garageCode' || event.key === 'userName') {
+      location.reload();
+    }
+  });
+
+  // ===== INICJALIZACJA =====
+  init();
 </script>
 </body>
 </html>
