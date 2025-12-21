@@ -216,7 +216,18 @@
   <input id="nameInput" placeholder="Imię">
   <button onclick="saveName()">Zapisz</button>
 </div>
-
+  
+<div id="installBanner" class="hidden center" style="flex-direction: column; padding: 20px; background: #222; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.8);">
+  <h2 style="margin: 10px 0; font-size: 1.6em;">Zainstaluj SGS Garaż</h2>
+  <p style="margin: 10px 0; color: #ccc; font-size: 1.1em;">Dodaj aplikację do ekranu głównego dla szybszego dostępu</p>
+  <button id="installBtn" style="background: #00aaff; font-size: 1.5em; padding: 18px; border-radius: 16px; margin: 10px 0;">
+    Zainstaluj aplikację
+  </button>
+  <button onclick="document.getElementById('installBanner').classList.add('hidden')" style="background: transparent; color: #aaa; border: 1px solid #555; font-size: 1.1em; padding: 12px;">
+    Może później
+  </button>
+</div>
+  
 <!-- 4️⃣ GŁÓWNY -->
 <div id="mainScreen" class="center hidden">
   <h1 id="greeting"></h1>
@@ -423,7 +434,53 @@ function openGarage() {
   });
 
   init();
+  // === Obsługa instalacji PWA ===
+let deferredPrompt;
+const installBanner = document.getElementById('installBanner');
+const installBtn = document.getElementById('installBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Chrome nie pokazuje domyślnego baneru instalacji na Androidzie
+  e.preventDefault();
+  // Zapamiętujemy zdarzenie, żeby później wywołać instalację
+  deferredPrompt = e;
+
+  // Pokazujemy nasz własny przycisk tylko na Androidzie w przeglądarce (nie w zainstalowanej PWA)
+  if (/Android/i.test(navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
+    installBanner.classList.remove('hidden');
+  }
+});
+
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+
+    // Pokazujemy natywny prompt instalacji
+    deferredPrompt.prompt();
+
+    // Czekamy na odpowiedź użytkownika
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+      console.log('Użytkownik zainstalował aplikację');
+    } else {
+      console.log('Użytkownik odmówił instalacji');
+    }
+
+    // Czyścimy i chowamy baner
+    deferredPrompt = null;
+    installBanner.classList.add('hidden');
+  });
+}
+
+// Ukrywamy baner, jeśli aplikacja jest już uruchomiona jako zainstalowana PWA
+window.addEventListener('load', () => {
+  if (window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches) {
+    installBanner.classList.add('hidden');
+  }
+});
 </script>
 </body>
 </html>
+
 
