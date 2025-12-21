@@ -18,9 +18,7 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
-
   .hidden { display: none !important; }
-
   .center {
     display: flex;
     flex-direction: column;
@@ -30,16 +28,13 @@
     padding: 20px;
     box-sizing: border-box;
   }
-
   h1, h2, h3 {
     margin: 15px 0;
     font-weight: normal;
   }
-
   h1 { font-size: 2.2em; }
   h2 { font-size: 1.8em; }
   h3 { font-size: 1.4em; }
-
   input, button {
     width: 90%;
     max-width: 400px;
@@ -49,17 +44,14 @@
     border-radius: 12px;
     box-sizing: border-box;
   }
-
   input {
     background: #333;
     border: 1px solid #555;
     color: white;
   }
-
   input::placeholder {
     color: #aaa;
   }
-
   button {
     user-select: none;
     cursor: pointer;
@@ -67,11 +59,9 @@
     color: white;
     border: none;
   }
-
   button:hover, button:active {
     background: #555;
   }
-
   /* Przycisk ustawień – mały i dyskretny */
   #settingsBtn {
     position: absolute;
@@ -86,7 +76,6 @@
     background: rgba(51, 51, 51, 0.7);
     backdrop-filter: blur(4px);
   }
-
   /* Panel ustawień */
   #settingsPanel {
     position: absolute;
@@ -101,30 +90,25 @@
     z-index: 100;
     box-shadow: 0 4px 20px rgba(0,0,0,0.6);
   }
-
   #settingsPanel h3 {
     font-size: 1.6em;
     margin-bottom: 20px;
   }
-
   #settingsPanel label {
     display: block;
     text-align: left;
     margin: 15px 0 8px;
     font-size: 1.2em;
   }
-
   #settingsPanel input {
     width: 100%;
     font-size: 1.3em;
     padding: 16px;
   }
-
   #settingsPanel button {
     width: 100%;
     margin-top: 15px;
   }
-
   /* SKANER QR – poprawiony */
   #qr-reader {
     width: 80vw;
@@ -138,7 +122,6 @@
     box-shadow: 0 0 20px rgba(0, 200, 255, 0.2);
     object-fit: cover;
   }
-
   /* Przycisk odwrócenia kamery – NAD skanerem */
   #switchCameraBtn {
     width: 80vw;
@@ -147,17 +130,14 @@
     padding: 14px;
     margin: 10px 0;
   }
-
   /* Ekran animacji */
   #animationScreen {
     font-size: 1.8em;
     line-height: 1.6;
   }
-
   #animationScreen div {
     margin: 30px 0;
   }
-
   /* Główny przycisk otwarcia garażu */
   #openBtn {
     font-size: 1.6em;
@@ -165,7 +145,6 @@
     margin-top: 40px;
     border-radius: 16px;
   }
-
   @media (max-width: 360px) {
     h1 { font-size: 2em; }
     h2 { font-size: 1.6em; }
@@ -177,10 +156,8 @@
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
-
 <!-- Przycisk ustawień -->
 <button id="settingsBtn">⚙ Ustawienia</button>
-
 <div id="settingsPanel">
   <h3>Ustawienia</h3>
   <label>Imię:</label>
@@ -190,33 +167,30 @@
   <button onclick="saveSettings()">Zapisz</button>
   <button onclick="resetSettings()">Resetuj ustawienia</button>
 </div>
-
 <!-- 1️⃣ KOD / QR -->
 <div id="codeScreen" class="center">
   <h2>Podaj kod dostępu SGS</h2>
   <input id="codeInput" placeholder="Kod dostępu">
   <button onclick="saveCode()">Zapisz kod</button>
   <h3>lub zeskanuj QR</h3>
-  
+ 
   <!-- Przycisk NAD skanerem -->
   <button id="switchCameraBtn" onclick="switchCamera()">Odwróć kamerę</button>
-  
+ 
   <!-- Skaner QR -->
   <div id="qr-reader"></div>
 </div>
-
 <!-- 2️⃣ ANIMACJA -->
 <div id="animationScreen" class="center hidden">
   <div id="animationText">Ładowanie...</div>
 </div>
-
 <!-- 3️⃣ IMIĘ -->
 <div id="nameScreen" class="center hidden">
   <h2>Podaj swoje imię</h2>
   <input id="nameInput" placeholder="Imię">
   <button onclick="saveName()">Zapisz</button>
 </div>
-  
+ 
 <div id="installBanner" class="hidden center" style="flex-direction: column; padding: 20px; background: #222; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.8);">
   <h2 style="margin: 10px 0; font-size: 1.6em;">Zainstaluj SGS Garaż</h2>
   <p style="margin: 10px 0; color: #ccc; font-size: 1.1em;">Dodaj aplikację do ekranu głównego dla szybszego dostępu</p>
@@ -227,13 +201,12 @@
     Może później
   </button>
 </div>
-  
+ 
 <!-- 4️⃣ GŁÓWNY -->
 <div id="mainScreen" class="center hidden">
   <h1 id="greeting"></h1>
   <button id="openBtn" onclick="openGarage()">Otwórz SGS</button>
 </div>
-
 <script>
   const codeScreen = document.getElementById("codeScreen");
   const animationScreen = document.getElementById("animationScreen");
@@ -277,7 +250,7 @@
     codeScreen.classList.add("hidden");
     animationScreen.classList.remove("hidden");
     const animationText = document.getElementById("animationText");
-   
+  
     const steps = [
       { text: "PROSZĘ CZEKAĆ", delay: 2000 },
       { text: "ŁĄCZENIE Z SGS", delay: 2000 },
@@ -318,43 +291,46 @@
     mainScreen.classList.remove("hidden");
   }
 
-function openGarage() {
+  function openGarage() {
     const token = localStorage.getItem("sgsCode");
     if (!token) {
       alert("Brak kodu dostępu!");
       return;
     }
 
-    // 1. Pokazujemy "Szyfrowanie połączenia…" 
+    // Pokazujemy komunikat szyfrowania
     greeting.innerText = "Szyfrowanie połączenia…";
 
-    // Losowy czas szyfrowania: 200–1500 ms
+    // Wibracja – działa na Androidzie i innych wspierających Vibration API
+    if (navigator.vibrate) {
+      // Seria krótkich impulsów – fajny efekt "przetwarzania"
+      navigator.vibrate([100, 50, 100, 50, 100]);
+    }
+
+    // Losowy czas "szyfrowania" (200–1500 ms)
     const encryptionDelay = Math.random() * (1500 - 200) + 200;
 
     setTimeout(() => {
-      // 2. Po zakończeniu "szyfrowania" przywracamy powitanie
+      // Przywracamy powitanie
       greeting.innerText = "Dzień dobry, " + localStorage.getItem("userName");
 
-      // 3. Dodatkowe opóźnienie 1 sekunda przed wysłaniem GET
+      // Dodatkowe opóźnienie 1 s przed wysłaniem żądania
       setTimeout(() => {
-        // Teraz wysyłamy żądania do Blynk
         const urlOn = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=1`;
         const urlOff = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=0`;
 
-        // Włączamy na chwilę
+        // Włączamy wirtualny pin na 1 sekundę
         const imgOn = new Image();
         imgOn.src = urlOn;
 
-        // Po 1 sekundzie wyłączamy
         setTimeout(() => {
           const imgOff = new Image();
           imgOff.src = urlOff;
         }, 1000);
-
-      }, 1000); // ← tutaj dodatkowe 1 s opóźnienia
-
+      }, 1000);
     }, encryptionDelay);
   }
+
   function startQR() {
     html5QrCode = new Html5Qrcode("qr-reader");
     Html5Qrcode.getCameras()
@@ -433,54 +409,36 @@ function openGarage() {
     }
   });
 
-  init();
   // === Obsługa instalacji PWA ===
-let deferredPrompt;
-const installBanner = document.getElementById('installBanner');
-const installBtn = document.getElementById('installBtn');
+  let deferredPrompt;
+  const installBanner = document.getElementById('installBanner');
+  const installBtn = document.getElementById('installBtn');
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  // Chrome nie pokazuje domyślnego baneru instalacji na Androidzie
-  e.preventDefault();
-  // Zapamiętujemy zdarzenie, żeby później wywołać instalację
-  deferredPrompt = e;
-
-  // Pokazujemy nasz własny przycisk tylko na Androidzie w przeglądarce (nie w zainstalowanej PWA)
-  if (/Android/i.test(navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
-    installBanner.classList.remove('hidden');
-  }
-});
-
-if (installBtn) {
-  installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-
-    // Pokazujemy natywny prompt instalacji
-    deferredPrompt.prompt();
-
-    // Czekamy na odpowiedź użytkownika
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === 'accepted') {
-      console.log('Użytkownik zainstalował aplikację');
-    } else {
-      console.log('Użytkownik odmówił instalacji');
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (/Android/i.test(navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
+      installBanner.classList.remove('hidden');
     }
-
-    // Czyścimy i chowamy baner
-    deferredPrompt = null;
-    installBanner.classList.add('hidden');
   });
-}
 
-// Ukrywamy baner, jeśli aplikacja jest już uruchomiona jako zainstalowana PWA
-window.addEventListener('load', () => {
-  if (window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches) {
-    installBanner.classList.add('hidden');
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBanner.classList.add('hidden');
+    });
   }
-});
+
+  window.addEventListener('load', () => {
+    if (window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches) {
+      installBanner.classList.add('hidden');
+    }
+  });
+
+  init();
 </script>
 </body>
 </html>
-
-
