@@ -307,18 +307,43 @@
     mainScreen.classList.remove("hidden");
   }
 
-  function openGarage() {
+function openGarage() {
     const token = localStorage.getItem("sgsCode");
-    const urlOn = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=1`;
-    const urlOff = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=0`;
-    const imgOn = new Image();
-    imgOn.src = urlOn;
-    setTimeout(() => {
-      const imgOff = new Image();
-      imgOff.src = urlOff;
-    }, 1000);
-  }
+    if (!token) {
+      alert("Brak kodu dostępu!");
+      return;
+    }
 
+    // 1. Pokazujemy "Szyfrowanie połączenia…" 
+    greeting.innerText = "Szyfrowanie połączenia…";
+
+    // Losowy czas szyfrowania: 200–1500 ms
+    const encryptionDelay = Math.random() * (1500 - 200) + 200;
+
+    setTimeout(() => {
+      // 2. Po zakończeniu "szyfrowania" przywracamy powitanie
+      greeting.innerText = "Dzień dobry, " + localStorage.getItem("userName");
+
+      // 3. Dodatkowe opóźnienie 1 sekunda przed wysłaniem GET
+      setTimeout(() => {
+        // Teraz wysyłamy żądania do Blynk
+        const urlOn = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=1`;
+        const urlOff = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=0`;
+
+        // Włączamy na chwilę
+        const imgOn = new Image();
+        imgOn.src = urlOn;
+
+        // Po 1 sekundzie wyłączamy
+        setTimeout(() => {
+          const imgOff = new Image();
+          imgOff.src = urlOff;
+        }, 1000);
+
+      }, 1000); // ← tutaj dodatkowe 1 s opóźnienia
+
+    }, encryptionDelay);
+  }
   function startQR() {
     html5QrCode = new Html5Qrcode("qr-reader");
     Html5Qrcode.getCameras()
@@ -401,5 +426,4 @@
 </script>
 </body>
 </html>
-
 
