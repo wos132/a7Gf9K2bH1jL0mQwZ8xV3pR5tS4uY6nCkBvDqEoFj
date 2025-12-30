@@ -152,10 +152,74 @@
     #qr-reader, #switchCameraBtn { width: 85vw; }
     #qr-reader { height: 85vw; }
   }
+  /* IKONA KOMUNIKACJI – prawy górny róg */
+#commIcon {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: 54px;      /* 18px × 3 */
+  height: 102px;    /* 34px × 3 */
+  border: 2px solid white;
+  border-radius: 5px;
+  display: none;
+  z-index: 9999;
+  box-sizing: border-box;
+}
+
+
+/* kropka telefonu */
+#commIcon::after {
+  content: "";
+  width: 12px;      /* 4px × 3 */
+  height: 12px;     /* 4px × 3 */
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 9px;      /* 3px × 3 */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+
+
+/* fale */
+.comm-wave {
+  position: absolute;
+  border: 2px solid white;
+  border-radius: 50%;
+  opacity: 0;
+  animation: commWave 1.4s infinite;
+}
+
+.wave1 {
+  width: 30px;      /* 10px × 3 */
+  height: 30px;     /* 10px × 3 */
+  top: 24px;        /* 8px × 3 */
+  left: 60px;       /* 20px × 3 */
+}
+
+.wave2 {
+  width: 54px;      /* 18px × 3 */
+  height: 54px;     /* 18px × 3 */
+  top: 12px;        /* 4px × 3 */
+  left: 48px;       /* 16px × 3 */
+  animation-delay: .3s;
+}
+
+
+@keyframes commWave {
+  0% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.7; }
+  100% { opacity: 0; transform: scale(1.2); }
+}
 </style>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
+<div id="commIcon">
+  <div class="comm-wave wave1"></div>
+  <div class="comm-wave wave2"></div>
+</div>
 <!-- Przycisk ustawień -->
 <button id="settingsBtn">⚙ Ustawienia</button>
 <div id="settingsPanel">
@@ -297,7 +361,7 @@
       alert("Brak kodu dostępu!");
       return;
     }
-
+    showCommIcon();
     // Pokazujemy komunikat szyfrowania
     greeting.innerText = "Szyfrowanie połączenia…";
 
@@ -316,7 +380,7 @@
 
       // Dodatkowe opóźnienie 1 s przed wysłaniem żądania
       setTimeout(() => {
-        const urlOn = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=1`;
+        const urlOn = `https://fra1.blynk.cloud/external/api/update?token=${token}&v1=1`;
         const urlOff = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=0`;
 
         // Włączamy wirtualny pin na 1 sekundę
@@ -324,9 +388,13 @@
         imgOn.src = urlOn;
 
         setTimeout(() => {
-          const imgOff = new Image();
-          imgOff.src = urlOff;
+        const imgOff = new Image();
+         imgOff.src = urlOff;
+
+     // koniec komunikacji
+         hideCommIcon();
         }, 1000);
+
       }, 1000);
     }, encryptionDelay);
   }
@@ -439,6 +507,14 @@
   });
 
   init();
+  function showCommIcon() {
+  document.getElementById("commIcon").style.display = "block";
+}
+
+function hideCommIcon() {
+  document.getElementById("commIcon").style.display = "none";
+}
+
 </script>
 </body>
 </html>
