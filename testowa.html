@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>My SGS</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111111">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+    text-align: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .hidden { display: none !important; }
+  .center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  h1, h2, h3 {
+    margin: 15px 0;
+    font-weight: normal;
+  }
+  h1 { font-size: 2.2em; }
+  h2 { font-size: 1.8em; }
+  h3 { font-size: 1.4em; }
+  input, button {
+    width: 90%;
+    max-width: 400px;
+    padding: 18px;
+    font-size: 1.4em;
+    margin: 12px 0;
+    border-radius: 12px;
+    box-sizing: border-box;
+  }
+  input {
+    background: #333;
+    border: 1px solid #555;
+    color: white;
+  }
+  input::placeholder {
+    color: #aaa;
+  }
+  button {
+    user-select: none;
+    cursor: pointer;
+    background: #333;
+    color: white;
+    border: none;
+  }
+  button:hover, button:active {
+    background: #555;
+  }
+  /* Przycisk ustawień – mały i dyskretny */
+  #settingsBtn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 8px 12px;
+    font-size: 1em;
+    min-width: unset;
+    width: auto;
+    z-index: 100;
+    border-radius: 10px;
+    background: rgba(51, 51, 51, 0.7);
+    backdrop-filter: blur(4px);
+  }
+  /* Panel ustawień */
+  #settingsPanel {
+    position: absolute;
+    top: 70px;
+    right: 12px;
+    background: #222;
+    padding: 25px;
+    border-radius: 16px;
+    display: none;
+    width: 90%;
+    max-width: 380px;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  #settingsPanel h3 {
+    font-size: 1.6em;
+    margin-bottom: 20px;
+  }
+  #settingsPanel label {
+    display: block;
+    text-align: left;
+    margin: 15px 0 8px;
+    font-size: 1.2em;
+  }
+  #settingsPanel input {
+    width: 100%;
+    font-size: 1.3em;
+    padding: 16px;
+  }
+  #settingsPanel button {
+    width: 100%;
+    margin-top: 15px;
+  }
+  /* SKANER QR – poprawiony */
+  #qr-reader {
+    width: 80vw;
+    max-width: 380px;
+    height: 80vw;
+    max-height: 380px;
+    margin: 20px auto;
+    border-radius: 16px;
+    border: 6px solid #444;
+    background: #000;
+    box-shadow: 0 0 20px rgba(0, 200, 255, 0.2);
+    object-fit: cover;
+  }
+  /* Przycisk odwrócenia kamery – NAD skanerem */
+  #switchCameraBtn {
+    width: 80vw;
+    max-width: 380px;
+    font-size: 1.2em;
+    padding: 14px;
+    margin: 10px 0;
+  }
+  /* Ekran animacji */
+  #animationScreen {
+    font-size: 1.8em;
+    line-height: 1.6;
+  }
+  #animationScreen div {
+    margin: 30px 0;
+  }
+  /* Główny przycisk otwarcia garażu */
+  #openBtn {
+    font-size: 1.6em;
+    padding: 22px;
+    margin-top: 40px;
+    border-radius: 16px;
+  }
+  @media (max-width: 360px) {
+    h1 { font-size: 2em; }
+    h2 { font-size: 1.6em; }
+    input, button { font-size: 1.3em; padding: 16px; }
+    #qr-reader, #switchCameraBtn { width: 85vw; }
+    #qr-reader { height: 85vw; }
+  }
+  /* IKONA KOMUNIKACJI – prawy górny róg */
+#commIcon {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: 54px;      /* 18px × 3 */
+  height: 102px;    /* 34px × 3 */
+  border: 2px solid white;
+  border-radius: 5px;
+  display: none;
+  z-index: 9999;
+  box-sizing: border-box;
+}
+
+/* kropka telefonu */
+#commIcon::after {
+  content: "";
+  width: 12px;      /* 4px × 3 */
+  height: 12px;     /* 4px × 3 */
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 9px;      /* 3px × 3 */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* fale */
+.comm-wave {
+  position: absolute;
+  border: 2px solid white;
+  border-radius: 50%;
+  opacity: 0;
+  animation: commWave 1.4s infinite;
+}
+
+.wave1 {
+  width: 30px;      /* 10px × 3 */
+  height: 30px;     /* 10px × 3 */
+  top: 24px;        /* 8px × 3 */
+  left: 60px;       /* 20px × 3 */
+}
+
+.wave2 {
+  width: 54px;      /* 18px × 3 */
+  height: 54px;     /* 18px × 3 */
+  top: 12px;        /* 4px × 3 */
+  left: 48px;       /* 16px × 3 */
+  animation-delay: .3s;
+}
+
+@keyframes commWave {
+  0% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.7; }
+  100% { opacity: 0; transform: scale(1.2); }
+}
+
+/* Wspólny styl dla banerów instalacji */
+.install-popup {
+  flex-direction: column; 
+  padding: 20px; 
+  background: #222; 
+  position: fixed; 
+  bottom: 0; 
+  left: 0; 
+  right: 0; 
+  z-index: 1000; 
+  border-top-left-radius: 20px; 
+  border-top-right-radius: 20px; 
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.8);
+}
+</style>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body>
+<div id="commIcon">
+  <div class="comm-wave wave1"></div>
+  <div class="comm-wave wave2"></div>
+</div>
+<button id="settingsBtn">⚙ Ustawienia</button>
+<div id="settingsPanel">
+  <h3>Ustawienia</h3>
+  <label>Imię:</label>
+  <input id="settingsName" type="text">
+  <label>Kod dostępu:</label>
+  <input id="settingsCode" type="text">
+  <button onclick="saveSettings()">Zapisz</button>
+  <button onclick="resetSettings()">Resetuj ustawienia</button>
+</div>
+<div id="codeScreen" class="center">
+  <h2>Podaj kod dostępu SGS</h2>
+  <input id="codeInput" placeholder="Kod dostępu">
+  <button onclick="saveCode()">Zapisz kod</button>
+  <h3>lub zeskanuj QR</h3>
+ 
+  <button id="switchCameraBtn" onclick="switchCamera()">Odwróć kamerę</button>
+ 
+  <div id="qr-reader"></div>
+</div>
+<div id="animationScreen" class="center hidden">
+  <div id="animationText">Ładowanie...</div>
+</div>
+<div id="nameScreen" class="center hidden">
+  <h2>Podaj swoje imię</h2>
+  <input id="nameInput" placeholder="Imię">
+  <button onclick="saveName()">Zapisz</button>
+</div>
+ 
+<div id="installBanner" class="hidden center install-popup">
+  <h2 style="margin: 10px 0; font-size: 1.6em;">Zainstaluj SGS Garaż</h2>
+  <p style="margin: 10px 0; color: #ccc; font-size: 1.1em;">Dodaj aplikację do ekranu głównego dla szybszego dostępu</p>
+  <button id="installBtn" style="background: #00aaff; font-size: 1.5em; padding: 18px; border-radius: 16px; margin: 10px 0;">
+    Zainstaluj aplikację
+  </button>
+  <button onclick="document.getElementById('installBanner').classList.add('hidden')" style="background: transparent; color: #aaa; border: 1px solid #555; font-size: 1.1em; padding: 12px;">
+    Może później
+  </button>
+</div>
+
+<div id="iosInstallBanner" class="hidden center install-popup">
+  <h2 style="margin: 10px 0; font-size: 1.6em;">Zainstaluj na iPhone</h2>
+  <p style="margin: 10px 0; color: #ccc; font-size: 1.1em; text-align: left;">
+    Aby dodać aplikację do ekranu głównego:<br><br>
+    1. Kliknij przycisk <strong>Udostępnij</strong> na dole paska.<br>
+    2. Wybierz opcję <strong>Dodaj do ekranu początkowego</strong>.
+  </p>
+  <button onclick="document.getElementById('iosInstallBanner').classList.add('hidden')" style="background: #00aaff; font-size: 1.5em; padding: 18px; border-radius: 16px; margin-top: 10px; width: 100%;">
+    Rozumiem
+  </button>
+</div>
+ 
+<div id="mainScreen" class="center hidden">
+  <h1 id="greeting"></h1>
+  <button id="openBtn" onclick="openGarage()">Polecenie SGS</button>
+</div>
+<script>
+  const codeScreen = document.getElementById("codeScreen");
+  const animationScreen = document.getElementById("animationScreen");
+  const nameScreen = document.getElementById("nameScreen");
+  const mainScreen = document.getElementById("mainScreen");
+  const codeInput = document.getElementById("codeInput");
+  const greeting = document.getElementById("greeting");
+  const settingsBtn = document.getElementById("settingsBtn");
+  const settingsPanel = document.getElementById("settingsPanel");
+  const settingsName = document.getElementById("settingsName");
+  const settingsCode = document.getElementById("settingsCode");
+  let html5QrCode;
+  let cameras = [];
+  let currentCameraIndex = 0;
+
+  function init() {
+    const code = localStorage.getItem("sgsCode");
+    const name = localStorage.getItem("userName");
+    if (!code) {
+      startQR();
+    } else if (!name) {
+      codeScreen.classList.add("hidden");
+      showNameScreen();
+    } else {
+      codeScreen.classList.add("hidden");
+      nameScreen.classList.add("hidden");
+      showMain();
+    }
+    
+    // Sprawdzenie instalacji przy starcie
+    checkInstallation();
+  }
+
+  function saveCode(val) {
+    val = val || codeInput.value.trim();
+    if (!val) return;
+    localStorage.setItem("sgsCode", val);
+    codeInput.value = val;
+    stopQR();
+    startAnimation();
+  }
+
+  function startAnimation() {
+    codeScreen.classList.add("hidden");
+    animationScreen.classList.remove("hidden");
+    const animationText = document.getElementById("animationText");
+  
+    const steps = [
+      { text: "PROSZĘ CZEKAĆ", delay: 2000 },
+      { text: "ŁĄCZENIE Z SGS", delay: 2000 },
+      { text: "WERYFIKACJA ADRESU IP", delay: 5000 },
+      { text: "WERYFIKACJA ADRESU MAC", delay: 2000 },
+      { text: "UZYSKIWANIE KODU DOSTĘPU", delay: 8000 },
+      { text: "UZYSKANO DOSTĘP", delay: 1500 },
+      { text: "WITAM W SGS", delay: 2000 }
+    ];
+    let stepIndex = 0;
+    function showNextStep() {
+      if (stepIndex < steps.length) {
+        animationText.innerText = steps[stepIndex].text;
+        setTimeout(showNextStep, steps[stepIndex].delay);
+        stepIndex++;
+      } else {
+        animationScreen.classList.add("hidden");
+        showNameScreen();
+      }
+    }
+    showNextStep();
+  }
+
+  function showNameScreen() {
+    nameScreen.classList.remove("hidden");
+  }
+
+  function saveName() {
+    const val = document.getElementById("nameInput").value.trim();
+    if (!val) return;
+    localStorage.setItem("userName", val);
+    nameScreen.classList.add("hidden");
+    showMain();
+  }
+
+  function showMain() {
+    greeting.innerText = "Dzień dobry, " + localStorage.getItem("userName");
+    mainScreen.classList.remove("hidden");
+  }
+
+  function openGarage() {
+    const token = localStorage.getItem("sgsCode");
+    if (!token) {
+      alert("Brak kodu dostępu!");
+      return;
+    }
+    showCommIcon();
+    // Pokazujemy komunikat szyfrowania
+    greeting.innerText = "Szyfrowanie połączenia…";
+
+    // Wibracja – działa na Androidzie i innych wspierających Vibration API
+    if (navigator.vibrate) {
+      // Seria krótkich impulsów – fajny efekt "przetwarzania"
+      navigator.vibrate([100, 50, 100, 50, 100]);
+    }
+
+    // Losowy czas "szyfrowania" (200–1500 ms)
+    const encryptionDelay = Math.random() * (1500 - 200) + 200;
+
+    setTimeout(() => {
+      // Przywracamy powitanie
+      greeting.innerText = "Dzień dobry, " + localStorage.getItem("userName");
+
+      // Dodatkowe opóźnienie 1 s przed wysłaniem żądania
+      setTimeout(() => {
+        const urlOn = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=1`;
+        const urlOff = `https://fra1.blynk.cloud/external/api/update?token=${token}&v0=0`;
+
+        // Włączamy wirtualny pin na 1 sekundę
+        const imgOn = new Image();
+        imgOn.src = urlOn;
+
+        setTimeout(() => {
+        const imgOff = new Image();
+         imgOff.src = urlOff;
+
+     // koniec komunikacji
+         hideCommIcon();
+        }, 1000);
+
+      }, 1000);
+    }, encryptionDelay);
+  }
+
+  function startQR() {
+    html5QrCode = new Html5Qrcode("qr-reader");
+    Html5Qrcode.getCameras()
+      .then(camList => {
+        cameras = camList;
+        if (cameras.length > 0) {
+          currentCameraIndex = 0;
+          startCamera(cameras[currentCameraIndex].id);
+        } else {
+          alert("Nie znaleziono kamer.");
+        }
+      })
+      .catch(err => alert("Błąd inicjalizacji kamery: " + err));
+  }
+
+  function startCamera(cameraId) {
+    html5QrCode.start(
+      cameraId,
+      { fps: 10, qrbox: { width: 300, height: 300 } },
+      decodedText => {
+        codeInput.value = decodedText;
+        saveCode(decodedText);
+      }
+    ).catch(err => console.log(err));
+  }
+
+  function stopQR() {
+    if (html5QrCode) {
+      html5QrCode.stop().catch(err => console.log(err));
+    }
+  }
+
+  function switchCamera() {
+    if (!cameras.length) return;
+    html5QrCode.stop().then(() => {
+      currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+      startCamera(cameras[currentCameraIndex].id);
+    }).catch(err => console.log(err));
+  }
+
+  settingsBtn.addEventListener('click', () => {
+    settingsName.value = localStorage.getItem("userName") || "";
+    settingsCode.value = localStorage.getItem("sgsCode") || "";
+    settingsPanel.style.display = settingsPanel.style.display === "none" ? "block" : "none";
+  });
+
+  function saveSettings() {
+    const newName = settingsName.value.trim();
+    const newCode = settingsCode.value.trim();
+    if (newName) localStorage.setItem("userName", newName);
+    if (newCode) localStorage.setItem("sgsCode", newCode);
+    settingsPanel.style.display = "none";
+    if (newName || newCode) {
+      showMain();
+    }
+  }
+
+  function resetSettings() {
+    if (confirm("Czy na pewno chcesz zresetować wszystkie ustawienia?")) {
+      localStorage.clear();
+      location.reload();
+    }
+  }
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(registration => console.log('Service Worker zarejestrowany:', registration))
+        .catch(err => console.log('Błąd rejestracji Service Workera:', err));
+    });
+  }
+
+  window.addEventListener('storage', event => {
+    if (event.key === 'sgsCode' || event.key === 'userName') {
+      location.reload();
+    }
+  });
+
+  // === Obsługa instalacji PWA (Android & iOS) ===
+  let deferredPrompt;
+  const installBanner = document.getElementById('installBanner');
+  const iosInstallBanner = document.getElementById('iosInstallBanner');
+  const installBtn = document.getElementById('installBtn');
+
+  function checkInstallation() {
+    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (isInStandaloneMode) return; // Jeśli już jest zainstalowane, nic nie pokazuj
+
+    if (isIos) {
+      // Dla iPhone pokazujemy baner z instrukcją po 3 sekundach
+      setTimeout(() => {
+        iosInstallBanner.classList.remove('hidden');
+      }, 3000);
+    }
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Pokaż baner Androida tylko jeśli to nie iOS i nie tryb standalone
+    if (!/iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase())) {
+      installBanner.classList.remove('hidden');
+    }
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBanner.classList.add('hidden');
+    });
+  }
+
+  init();
+
+  function showCommIcon() {
+  document.getElementById("commIcon").style.display = "block";
+}
+
+function hideCommIcon() {
+  document.getElementById("commIcon").style.display = "none";
+}
+</script>
+</body>
+</html>
